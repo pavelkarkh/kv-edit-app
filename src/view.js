@@ -20,6 +20,18 @@ class View extends EventEmitter {
         return this.kvList.querySelector(`[data-id="${id}"]`);
     }
 
+    getKvObject(kvItem) {
+        const id = kvItem.getAttribute('data-id');
+        const checkbox = kvItem.querySelector('.checkbox');
+        const keyInput = kvItem.querySelector('.key-input');
+        const valueInput = kvItem.querySelector('.value-input');
+        const label = kvItem.querySelector('.kv-item-title');
+        const editButton = kvItem.querySelector('.edit-button');
+        const removeButton = kvItem.querySelector('.remove-button');
+
+        return {id, checkbox, keyInput, valueInput, label, editButton, removeButton, self: kvItem};
+    }
+
     handleForm(event) {
         
         event.preventDefault();
@@ -38,16 +50,31 @@ class View extends EventEmitter {
         //
     }
 
-    handleEdit() {
-        //
+    handleEdit({ target }) {
+        const kvItem = this.getKvObject(target.parentNode);
+        const isEditing = kvItem.self.classList.contains('editing');
+
+        let key = kvItem.keyInput.value;
+        let value = kvItem.valueInput.value;
+
+        if (isEditing) {
+            this.emmit('edit', {id: kvItem.id, key, value});
+        } else {
+            let textForEditing = kvItem.label.textContent.split(':');
+            kvItem.keyInput.value = textForEditing[0].trim();
+            kvItem.valueInput.value = textForEditing[1].trim();
+            kvItem.editButton.textContent = 'Сохранить';
+            kvItem.self.classList.add('editing');
+        }
     }
 
-    handleRemove() {
-        //
+    handleRemove({ target }) {
+        const kvItem = this.getKvObject(target.parentNode);
+        this.emmit('remove', kvItem.id);
     }
 
-    handleBulkRemove() {
-
+    handleBulkRemove({ target }) {
+        //
     }
 
     createKvItem(item) {
@@ -94,11 +121,30 @@ class View extends EventEmitter {
         return item;
     }
 
+    show(items) {
+        items.forEach(item => {
+            const kvItem = this.createKvItem(item);
+            this.kvList.appendChild(kvItem);
+        });
+    }
+
     addKvItem(item) {
         const kvItem = this.createKvItem(item);
         this.addKeyInput.value = '';
         this.addValueInput.value = '';
         this.kvList.appendChild(kvItem);
+    }
+
+    editKvItem({id, key, value}) {
+        const kvItem = this.getKvObject(this.findKvItem(id));
+        kvItem.label.textContent = `${key}: ${value}`;
+        kvItem.editButton.textContent = 'Изменить';
+        kvItem.self.classList.remove('editing');
+    }
+
+    removeKvItem(id) {
+        const kvItem = this.getKvObject(this.findKvItem(id));
+        this.kvList.removeChild(kvItem.self);
     }
 
 }

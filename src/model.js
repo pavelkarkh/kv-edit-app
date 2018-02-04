@@ -9,7 +9,7 @@ class Model extends EventEmitter {
     }
 
     getItem(id) {
-        this.storage.find(item => item.id == id);
+        return this.storage.find(item => item.id == id);
     }
 
     addItem(item) {
