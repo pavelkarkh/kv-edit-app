@@ -32,6 +32,7 @@ button {
     margin-right: .3rem;
     margin-left: .3rem;
     text-transform: uppercase;
+    outline: none;
 }
 
 span {
@@ -131,9 +132,13 @@ button:active, .edit-button:active,
 
 .bulk {
     border-top: 1px solid #d2d2d2;
-    display: flex;
+    display: none;
     background-color: #fafafa;
     padding: 10px;
+}
+
+.bulk.active {
+    display: flex;
 }
 
 .bulk button {

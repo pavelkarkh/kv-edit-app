@@ -11,6 +11,7 @@ class View extends EventEmitter {
         this.kvList = document.getElementById('kv-list');
         this.form = document.getElementById('kv-form');
         this.bulkRemoveButton = document.getElementById('remove-button-bulk');
+        this.bulkDiv = document.getElementById('bulk');
 
         this.form.addEventListener('submit', this.handleForm.bind(this));
         this.bulkRemoveButton.addEventListener('click', this.handleBulkRemove.bind(this));
@@ -46,8 +47,18 @@ class View extends EventEmitter {
         this.emmit('add', kv);
     }
 
-    handleToggle() {
-        //
+    handleToggle({ target }) {
+        const kvItem = this.getKvObject(target.parentNode);
+        
+        if (kvItem.checkbox.checked) {
+            if (!this.bulkDiv.classList.contains('active')){
+                this.bulkDiv.classList.add('active');
+            }
+        } else {
+            if(!this.checkItems()) {
+                this.bulkDiv.classList.remove('active');
+            }
+        }
     }
 
     handleEdit({ target }) {
@@ -73,8 +84,17 @@ class View extends EventEmitter {
         this.emmit('remove', kvItem.id);
     }
 
-    handleBulkRemove({ target }) {
-        //
+    handleBulkRemove() {
+        const items = this.getKvItemsArr();
+        
+        items.forEach(item => {
+            const kvItem = this.getKvObject(item);
+            if(kvItem.checkbox.checked) {
+                this.emmit('remove', kvItem.id);
+            }
+        });
+
+        this.bulkDiv.classList.remove('active');
     }
 
     createKvItem(item) {
@@ -110,13 +130,11 @@ class View extends EventEmitter {
     }
 
     addEventListeners(item) {
-        const checkbox = item.querySelector('.checkbox');
-        const editButton = item.querySelector('.edit-button');
-        const removeButton = item.querySelector('.remove-button');
+        const kvItem = this.getKvObject(item);
 
-        checkbox.addEventListener('change', this.handleToggle.bind(this));
-        editButton.addEventListener('click', this.handleEdit.bind(this));
-        removeButton.addEventListener('click', this.handleRemove.bind(this));
+        kvItem.checkbox.addEventListener('change', this.handleToggle.bind(this));
+        kvItem.editButton.addEventListener('click', this.handleEdit.bind(this));
+        kvItem.removeButton.addEventListener('click', this.handleRemove.bind(this));
 
         return item;
     }
@@ -145,6 +163,31 @@ class View extends EventEmitter {
     removeKvItem(id) {
         const kvItem = this.getKvObject(this.findKvItem(id));
         this.kvList.removeChild(kvItem.self);
+    }
+
+    checkItems(){
+        const items = this.getKvItemsArr();
+        let checked = false;
+        
+        items.forEach(item => {
+            const kvItem = this.getKvObject(item);
+            if(kvItem.checkbox.checked) {
+                checked = true;
+            }
+        });
+
+        return checked;
+    }
+
+    getKvItemsArr() {
+        const items = this.kvList.getElementsByClassName('kv-item');
+        const itemsArr = [];
+
+        for (let item of items) {
+            itemsArr.push(item);
+        }
+
+        return itemsArr;
     }
 
 }
